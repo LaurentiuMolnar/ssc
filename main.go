@@ -3,7 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/amoghe/go-crypt"
+	"github.com/tredoe/osutil/user/crypt/sha512_crypt"
+	"github.com/tredoe/osutil/user/crypt"
 	"os"
 	"sync"
 )
@@ -11,25 +12,18 @@ import (
 const ALPHABET = "abcdefghijklmnopqrstuvwxz0123456789!@#$%^&*()"
 const alphabetSize = len(ALPHABET)
 
-
-// const hash = "$6$FA5jtDxj$UyJD6JZ5UpWn47bJZQvxkGJb8xG9k4X4FyYAt1ZsPK5L54V1Eyk5eumea.d7jEdRdeHAoxaGpPxj5j6KOov500"
-const hash = "$6$FA5jtDxj$zmYqs3rVUlk9ZRnyq5b1HM53XXso6Cu4h4UElbCEK5z/v.VbyXLQsvZL4Kxj0vd2OfIIXnOA9XNgogrdNm8tb/"
+const hash = "$6$FA5jtDxj$UyJD6JZ5UpWn47bJZQvxkGJb8xG9k4X4FyYAt1ZsPK5L54V1Eyk5eumea.d7jEdRdeHAoxaGpPxj5j6KOov500"
+// const hash = "$6$FA5jtDxj$zmYqs3rVUlk9ZRnyq5b1HM53XXso6Cu4h4UElbCEK5z/v.VbyXLQsvZL4Kxj0vd2OfIIXnOA9XNgogrdNm8tb/"
 const salt = "$6$FA5jtDxj$"
 
 const prefix = "<:cti18:>"
-
-// func timer(f func()) time.Duration {
-//
-// 	start := time.Now()
-// 	fmt.Printf("Algorithm started at %s\n", start)
-// 	f()
-// 	elapsed := time.Since(start)
-// 	return elapsed
-// }
+var byteSalt []byte = []byte(salt)
+var arg1 string = os.Args[1]
 
 func wrapper() {
 
 	var wg sync.WaitGroup
+	c := sha512_crypt.New()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -37,17 +31,15 @@ func wrapper() {
 	for i := 0; i < alphabetSize; i++ {
 
 		wg.Add(alphabetSize)
-		go Gen3(ctx, cancel, &wg, string(ALPHABET[i]))
+		go Gen3(ctx, cancel, &wg, string(ALPHABET[i]), c)
 	}
 
 	wg.Wait()
 }
 
-func Gen3(ctx context.Context, cancel context.CancelFunc, wg *sync.WaitGroup, first string) {
+func Gen3(ctx context.Context, cancel context.CancelFunc, wg *sync.WaitGroup, first string, c crypt.Crypter) {
 	defer wg.Done()
 	var s string
-
-	arg1 := os.Args[1]
 
 	for i := 0; i < alphabetSize; i++ {
 		for j := 0; j < alphabetSize; j++ {
@@ -56,7 +48,7 @@ func Gen3(ctx context.Context, cancel context.CancelFunc, wg *sync.WaitGroup, fi
 				// fmt.Println(s)
 				fmt.Println(".")
 
-				hashed, err := crypt.Crypt(s, salt)
+				hashed, err := c.Generate([]byte(s), byteSalt)
 				if err != nil {
 					fmt.Errorf("Some error occurred: %s", err)
 					return
