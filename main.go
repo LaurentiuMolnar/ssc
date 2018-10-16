@@ -47,11 +47,14 @@ func Gen3(ctx context.Context, cancel context.CancelFunc, wg *sync.WaitGroup, fi
 	defer wg.Done()
 	var s string
 
+	arg1 := os.Args[1]
+
 	for i := 0; i < alphabetSize; i++ {
 		for j := 0; j < alphabetSize; j++ {
 			for k := 0; k < alphabetSize; k++ {
-				s = fmt.Sprintf("%s%s%s%s%s%sn", prefix, os.Args[1], first, string(ALPHABET[i]), string(ALPHABET[j]), string(ALPHABET[k]))
-				fmt.Println(s)
+				s = fmt.Sprintf("%s%s%s%s%s%sn", prefix, arg1, first, string(ALPHABET[i]), string(ALPHABET[j]), string(ALPHABET[k]))
+				// fmt.Println(s)
+				fmt.Println(".")
 
 				hashed, err := crypt.Crypt(s, salt)
 				if err != nil {
