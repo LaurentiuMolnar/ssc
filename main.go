@@ -4,29 +4,28 @@ import (
 	"context"
 	"fmt"
 	"github.com/amoghe/go-crypt"
+	"os"
 	"sync"
-	"time"
 )
 
 const ALPHABET = "abcdefghijklmnopqrstuvwxz0123456789!@#$%^&*()"
 const alphabetSize = len(ALPHABET)
 
-// const hash = "$6$SRM3J9B1$Fk7jQICjeGcPWbNM8FsHCoSQPQ/SjzK/dtzy14oT62haJji6539o9qfD7oMpdkZgfajsQSThHvEvhhATZtIb00"
-// const salt = "$6$SRM3J9B1$"
 
-const hash = "$6$4LDtKhWO$T1.Bnzi/k/XYJsNA26FJ2wDOOcEea/ZeojzO8/QHEe5mV5A84/uvmImYt0rGb0LWaINULcQL7OIfdUp90vbHU/"
-const salt = "$6$4LDtKhWO$"
+// const hash = "$6$FA5jtDxj$UyJD6JZ5UpWn47bJZQvxkGJb8xG9k4X4FyYAt1ZsPK5L54V1Eyk5eumea.d7jEdRdeHAoxaGpPxj5j6KOov500"
+const hash = "$6$FA5jtDxj$zmYqs3rVUlk9ZRnyq5b1HM53XXso6Cu4h4UElbCEK5z/v.VbyXLQsvZL4Kxj0vd2OfIIXnOA9XNgogrdNm8tb/"
+const salt = "$6$FA5jtDxj$"
 
 const prefix = "<:cti18:>"
 
-func timer(f func()) time.Duration {
-
-	start := time.Now()
-	fmt.Printf("Algorithm started at %s\n", start)
-	f()
-	elapsed := time.Since(start)
-	return elapsed
-}
+// func timer(f func()) time.Duration {
+//
+// 	start := time.Now()
+// 	fmt.Printf("Algorithm started at %s\n", start)
+// 	f()
+// 	elapsed := time.Since(start)
+// 	return elapsed
+// }
 
 func wrapper() {
 
@@ -37,7 +36,7 @@ func wrapper() {
 
 	for i := 0; i < alphabetSize; i++ {
 
-		wg.Add(1)
+		wg.Add(alphabetSize)
 		go Gen3(ctx, cancel, &wg, string(ALPHABET[i]))
 	}
 
@@ -51,7 +50,7 @@ func Gen3(ctx context.Context, cancel context.CancelFunc, wg *sync.WaitGroup, fi
 	for i := 0; i < alphabetSize; i++ {
 		for j := 0; j < alphabetSize; j++ {
 			for k := 0; k < alphabetSize; k++ {
-				s = fmt.Sprintf("%s%s%s%s%s", prefix, first, string(ALPHABET[i]), string(ALPHABET[j]), string(ALPHABET[k]))
+				s = fmt.Sprintf("%s%s%s%s%s%sn", prefix, os.Args[1], first, string(ALPHABET[i]), string(ALPHABET[j]), string(ALPHABET[k]))
 				fmt.Println(s)
 
 				hashed, err := crypt.Crypt(s, salt)
@@ -78,7 +77,6 @@ func Gen3(ctx context.Context, cancel context.CancelFunc, wg *sync.WaitGroup, fi
 
 func main() {
 
-	// fmt.Printf("Ran %s combinations\n", string(wrapper(runs)))
-	fmt.Printf("Algorithm cracked password in %s\n", timer(wrapper))
+	wrapper()
 
 }
